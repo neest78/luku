@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LukuPay App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" xintegrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Configure Tailwind to use Inter font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles for modals */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 40; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            padding: 1.5rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+            width: 100%;
+            max-width: 32rem; /* max-w-md */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-800 p-4 sm:p-6 lg:p-8">
+
+    <div id="message-box" class="fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 hidden"></div>
+
+    <header class="flex flex-col sm:flex-row justify-between items-center mb-8 p-4 bg-white rounded-xl shadow-md">
+        <h1 class="text-3xl font-bold text-indigo-700 mb-4 sm:mb-0">LukuPay App</h1>
+        <div class="flex space-x-2">
+            <button id="add-meter-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <i class="fas fa-plus-circle mr-2"></i> Ongeza Mita
+            </button>
+            <button id="purchase-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                <i class="fas fa-bolt mr-2"></i> Nunua Umeme
+            </button>
+        </div>
+    </header>
+
+    <div id="add-meter-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">Ongeza Mita Mpya</h2>
+            <form id="add-meter-form">
+                <div class="mb-4">
+                    <label for="meter-number" class="block text-gray-700 text-sm font-semibold mb-2">Namba ya Mita:</label>
+                    <input type="text" id="meter-number" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" required placeholder="Mfano: 01234567890">
+                </div>
+                <div class="mb-6">
+                    <label for="meter-name" class="block text-gray-700 text-sm font-semibold mb-2">Jina la Mita (Mfano: Nyumbani, Ofisi):</label>
+                    <input type="text" id="meter-name" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500" required placeholder="Mfano: Nyumbani Kwangu">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="close-add-meter-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                        Funga
+                    </button>
+                    <button type="submit" id="add-meter-submit-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Ongeza Mita
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="purchase-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold text-green-700 mb-4">Nunua Umeme</h2>
+            <form id="purchase-form">
+                <div class="mb-4">
+                    <label for="select-meter" class="block text-gray-700 text-sm font-semibold mb-2">Chagua Mita:</label>
+                    <select id="select-meter" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500" required>
+                        <option value="">-- Chagua Mita --</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label for="purchase-amount" class="block text-gray-700 text-sm font-semibold mb-2">Kiasi (Tsh):</label>
+                    <input type="number" id="purchase-amount" class="shadow appearance-none border rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500" required min="1000" step="any" placeholder="Mfano: 10000">
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button type="button" id="close-purchase-modal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out">
+                        Funga
+                    </button>
+                    <button type="submit" id="purchase-submit-btn" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                        Lipa Sasa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <section class="mb-8 p-6 bg-white rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-indigo-700 mb-4">Mita Zangu</h2>
+        <div id="meters-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            </div>
+        <p id="no-meters-message" class="text-gray-600 hidden">Bado haujaongeza mita yoyote. Bonyeza "Ongeza Mita" kuanza.</p>
+    </section>
+
+    <section class="p-6 bg-white rounded-xl shadow-md">
+        <h2 class="text-2xl font-bold text-indigo-700 mb-4">Historia ya Miamala</h2>
+        <div id="transactions-history" class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-lg overflow-hidden">
+                <thead class="bg-gray-100 border-b border-gray-200">
+                    <tr>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Tarehe</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Mita</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Kiasi (Tsh)</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Tokeni</th>
+                        <th class="py-3 px-4 text-left text-sm font-semibold text-gray-600">Vitendo</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-table-body">
+                    </tbody>
+            </table>
+        </div>
+        <p id="no-transactions-message" class="text-gray-600 hidden">Bado hujafanya muamala wowote wa umeme.</p>
+    </section>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the Canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId = null;
+        let isAuthReady = false;
+
+        // UI Elements
+        const messageBox = document.getElementById('message-box');
+        const addMeterModal = document.getElementById('add-meter-modal');
+        const purchaseModal = document.getElementById('purchase-modal');
+        const addMeterBtn = document.getElementById('add-meter-btn');
+        const purchaseBtn = document.getElementById('purchase-btn');
+        const closeAddMeterModalBtn = document.getElementById('close-add-meter-modal');
+        const closePurchaseModalBtn = document.getElementById('close-purchase-modal');
+        const addMeterForm = document.getElementById('add-meter-form');
+        const purchaseForm = document.getElementById('purchase-form');
+        const meterNumberInput = document.getElementById('meter-number');
+        const meterNameInput = document.getElementById('meter-name');
+        const selectMeterDropdown = document.getElementById('select-meter');
+        const purchaseAmountInput = document.getElementById('purchase-amount');
+        const metersListDiv = document.getElementById('meters-list');
+        const transactionsTableBody = document.getElementById('transactions-table-body');
+        const noMetersMessage = document.getElementById('no-meters-message');
+        const noTransactionsMessage = document.getElementById('no-transactions-message');
+        const addMeterSubmitBtn = document.getElementById('add-meter-submit-btn');
+        const purchaseSubmitBtn = document.getElementById('purchase-submit-btn');
+
+        // Function to display messages
+        function showMessage(msg, isError = false) {
+            messageBox.textContent = msg;
+            messageBox.classList.remove('hidden');
+            messageBox.classList.remove('bg-red-500', 'bg-green-500');
+            if (isError) {
+                messageBox.classList.add('bg-red-500');
+            } else {
+                messageBox.classList.add('bg-green-500');
+            }
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000); // Hide after 5 seconds
+        }
+
+        // Initialize Firebase
+        async function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Listen for auth state changes
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Mtumiaji ameunganishwa:", userId);
+                    } else {
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                console.log("Kuingia na custom token kumefanikiwa.");
+                            } else {
+                                await signInAnonymously(auth);
+                                console.log("Kuingia bila jina kumefanikiwa.");
+                            }
+                        } catch (error) {
+                            console.error("Kosa wakati wa kuingia:", error);
+                            showMessage("Kosa: Imeshindwa kuingia. Jaribu tena.", true);
+                        }
+                    }
+                    isAuthReady = true;
+                    // Start listening to data only after auth is ready
+                    listenToMeters();
+                    listenToTransactions();
+                });
+            } catch (error) {
+                console.error("Kosa wakati wa kuinitialize Firebase:", error);
+                showMessage("Kosa: Imeshindwa kuunganisha na huduma za Firebase.", true);
+            }
+        }
+
+        // Listen to meters collection in real-time
+        function listenToMeters() {
+            if (!db || !userId) {
+                console.log("Firestore au User ID haijapatikana kwa mita.");
+                return;
+            }
+            const metersCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/meters`);
+            onSnapshot(metersCollectionRef, (snapshot) => {
+                metersListDiv.innerHTML = ''; // Clear current list
+                selectMeterDropdown.innerHTML = '<option value="">-- Chagua Mita --</option>'; // Clear dropdown
+                if (snapshot.empty) {
+                    noMetersMessage.classList.remove('hidden');
+                } else {
+                    noMetersMessage.classList.add('hidden');
+                    snapshot.docs.forEach(doc => {
+                        const meter = { id: doc.id, ...doc.data() };
+                        // Add to meters list
+                        const meterCard = document.createElement('div');
+                        meterCard.className = 'bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-200 flex flex-col justify-between';
+                        meterCard.innerHTML = `
+                            <div>
+                                <h3 class="text-lg font-semibold text-blue-800">${meter.name}</h3>
+                                <p class="text-gray-700">Namba ya Mita: <span class="font-mono text-blue-900">${meter.number}</span></p>
+                            </div>
+                            <button data-id="${meter.id}" class="delete-meter-btn mt-3 bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded-lg text-sm transition duration-300 ease-in-out self-end">
+                                Futa
+                            </button>
+                        `;
+                        metersListDiv.appendChild(meterCard);
+
+                        // Add to select dropdown
+                        const option = document.createElement('option');
+                        option.value = meter.id;
+                        option.textContent = `${meter.name} (${meter.number})`;
+                        selectMeterDropdown.appendChild(option);
+                    });
+
+                    // Attach event listeners to delete buttons
+                    document.querySelectorAll('.delete-meter-btn').forEach(button => {
+                        button.onclick = (e) => handleDeleteMeter(e.target.dataset.id);
+                    });
+                }
+            }, (error) => {
+                console.error("Kosa wakati wa kupakua mita:", error);
+                showMessage("Kosa: Imeshindwa kupakua mita za umeme.", true);
+            });
+        }
+
+        // Listen to transactions collection in real-time
+        function listenToTransactions() {
+            if (!db || !userId) {
+                console.log("Firestore au User ID haijapatikana kwa miamala.");
+                return;
+            }
+            const transactionsCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/transactions`);
+            onSnapshot(transactionsCollectionRef, (snapshot) => {
+                transactionsTableBody.innerHTML = ''; // Clear current list
+                if (snapshot.empty) {
+                    noTransactionsMessage.classList.remove('hidden');
+                    transactionsTableBody.parentElement.classList.add('hidden'); // Hide table if no transactions
+                } else {
+                    noTransactionsMessage.classList.add('hidden');
+                    transactionsTableBody.parentElement.classList.remove('hidden'); // Show table
+                    const fetchedTransactions = [];
+                    snapshot.docs.forEach(doc => {
+                        fetchedTransactions.push({ id: doc.id, ...doc.data() });
+                    });
+                    // Sort transactions by timestamp in descending order (newest first)
+                    fetchedTransactions.sort((a, b) => b.timestamp - a.timestamp);
+
+                    fetchedTransactions.forEach(transaction => {
+                        const row = document.createElement('tr');
+                        row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                        row.innerHTML = `
+                            <td class="py-3 px-4 text-sm text-gray-800">${new Date(transaction.timestamp).toLocaleString('sw-TZ')}</td>
+                            <td class="py-3 px-4 text-sm text-gray-800">${transaction.meterName} (${transaction.meterNumber})</td>
+                            <td class="py-3 px-4 text-sm text-gray-800">${transaction.amount.toLocaleString('sw-TZ')}</td>
+                            <td class="py-3 px-4 text-sm font-mono text-indigo-700 break-all">${transaction.token}</td>
+                            <td class="py-3 px-4 text-sm">
+                                <button data-token="${transaction.token}" class="copy-token-btn bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-2 rounded-lg text-xs transition duration-300 ease-in-out">
+                                    Nakili
+                                </button>
+                            </td>
+                        `;
+                        transactionsTableBody.appendChild(row);
+                    });
+
+                    // Attach event listeners to copy buttons
+                    document.querySelectorAll('.copy-token-btn').forEach(button => {
+                        button.onclick = (e) => copyToClipboard(e.target.dataset.token);
+                    });
+                }
+            }, (error) => {
+                console.error("Kosa wakati wa kupakua miamala:", error);
+                showMessage("Kosa: Imeshindwa kupakua historia ya miamala.", true);
+            });
+        }
+
+        // Handle Add Meter form submission
+        addMeterForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const meterNumber = meterNumberInput.value.trim();
+            const meterName = meterNameInput.value.trim();
+
+            if (!meterNumber || !meterName) {
+                showMessage("Tafadhali jaza namba ya mita na jina.", true);
+                return;
+            }
+            if (!db || !userId) {
+                showMessage("Kosa: Huduma ya database haijapatikana au mtumiaji hajaunganishwa.", true);
+                return;
+            }
+
+            addMeterSubmitBtn.textContent = 'Inaongeza...';
+            addMeterSubmitBtn.disabled = true;
+
+            try {
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/meters`), {
+                    number: meterNumber,
+                    name: meterName,
+                    createdAt: Date.now(),
+                });
+                showMessage("Mita imeongezwa kwa mafanikio!");
+                meterNumberInput.value = '';
+                meterNameInput.value = '';
+                addMeterModal.classList.add('hidden');
+            } catch (error) {
+                console.error("Kosa wakati wa kuongeza mita:", error);
+                showMessage("Kosa: Imeshindwa kuongeza mita. Jaribu tena.", true);
+            } finally {
+                addMeterSubmitBtn.textContent = 'Ongeza Mita';
+                addMeterSubmitBtn.disabled = false;
+            }
+        });
+
+        // Handle Delete Meter
+        async function handleDeleteMeter(meterId) {
+            if (!db || !userId) {
+                showMessage("Kosa: Huduma ya database haijapatikana au mtumiaji hajaunganishwa.", true);
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, `artifacts/${appId}/users/${userId}/meters`, meterId));
+                showMessage("Mita imefutwa kwa mafanikio!");
+            } catch (error) {
+                console.error("Kosa wakati wa kufuta mita:", error);
+                showMessage("Kosa: Imeshindwa kufuta mita. Jaribu tena.", true);
+            }
+        }
+
+        // Handle Purchase Electricity form submission
+        purchaseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const selectedMeterId = selectMeterDropdown.value;
+            const purchaseAmount = parseFloat(purchaseAmountInput.value);
+
+            if (!selectedMeterId || isNaN(purchaseAmount) || purchaseAmount <= 0) {
+                showMessage("Tafadhali chagua mita na uweke kiasi halali cha pesa.", true);
+                return;
+            }
+            if (!db || !userId) {
+                showMessage("Kosa: Huduma ya database haijapatikana au mtumiaji hajaunganishwa.", true);
+                return;
+            }
+
+            purchaseSubmitBtn.textContent = 'Inanunua...';
+            purchaseSubmitBtn.disabled = true;
+
+            const selectedMeterOption = selectMeterDropdown.options[selectMeterDropdown.selectedIndex];
+            const selectedMeterNumber = selectedMeterOption.textContent.match(/\(([^)]+)\)/)[1]; // Extract meter number from option text
+            const selectedMeterName = selectedMeterOption.textContent.split('(')[0].trim();
+
+            try {
+                // Simulate API call to generate token using Gemini API
+                const prompt = `Tengeneza tokeni ya LUKU yenye tarakimu 20 kwa kiasi cha Tsh ${purchaseAmount} kwa mita namba ${selectedMeterNumber}. Tokeni iwe namba tu.`;
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // API key will be provided by Canvas runtime
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                let generatedToken = "Kosa la Tokeni"; // Default error message
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    generatedToken = result.candidates[0].content.parts[0].text.replace(/\D/g, '').substring(0, 20); // Ensure it's only numbers and 20 digits
+                    if (generatedToken.length < 20) {
+                        generatedToken = generatedToken.padEnd(20, '0'); // Ensure it has 20 digits
+                    }
+                } else {
+                    console.error("Kosa: Muundo wa jibu la API haukutarajiwa.", result);
+                    generatedToken = "Kosa la Tokeni (Jaribu tena)";
+                }
+
+                // Save transaction to Firestore
+                await addDoc(collection(db, `artifacts/${appId}/users/${userId}/transactions`), {
+                    meterId: selectedMeterId,
+                    meterNumber: selectedMeterNumber,
+                    meterName: selectedMeterName,
+                    amount: purchaseAmount,
+                    token: generatedToken,
+                    timestamp: Date.now(),
+                });
+
+                showMessage(`Umeme umenunuliwa kwa mafanikio! Tokeni yako: ${generatedToken}`);
+                purchaseAmountInput.value = '';
+                selectMeterDropdown.value = '';
+                purchaseModal.classList.add('hidden');
+            } catch (error) {
+                console.error("Kosa wakati wa kununua umeme:", error);
+                showMessage("Kosa: Imeshindwa kununua umeme. Jaribu tena.", true);
+            } finally {
+                purchaseSubmitBtn.textContent = 'Lipa Sasa';
+                purchaseSubmitBtn.disabled = false;
+            }
+        });
+
+        // Function to copy text to clipboard
+        function copyToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showMessage("Tokeni imenakiliwa!");
+            } catch (err) {
+                console.error('Imeshindwa kunakili tokeni:', err);
+                showMessage("Kosa: Imeshindwa kunakili tokeni. Jaribu tena mwenyewe.", true);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Event Listeners for Modals
+        addMeterBtn.addEventListener('click', () => addMeterModal.classList.remove('hidden'));
+        closeAddMeterModalBtn.addEventListener('click', () => addMeterModal.classList.add('hidden'));
+        purchaseBtn.addEventListener('click', () => purchaseModal.classList.remove('hidden'));
+        closePurchaseModalBtn.addEventListener('click', () => purchaseModal.classList.add('hidden'));
+
+        // Initialize Firebase when the window loads
+        window.onload = initializeFirebase;
+    </script>
+</body>
+</html>
